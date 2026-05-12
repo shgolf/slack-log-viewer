@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: slack-log-viewer-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: slack-log-db
+          property: connectionString
+      - key: SLACK_BOT_TOKEN
+        sync: false
+      - key: NODE_ENV
+        value: production
+
+  - type: static
+    name: slack-log-viewer-frontend
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE
+        value: https://slack-log-viewer-backend.onrender.com/api
+
+  - type: cron
+    name: slack-log-sync
+    runtime: node
+    schedule: "0 * * * *"
+    buildCommand: echo "no build"
+    startCommand: node backend/scripts/sync.mjs
+    envVars:
+      - key: BACKEND_URL
+        value: https://slack-log-viewer-backend.onrender.com
+
+databases:
+  - name: slack-log-db
+    databaseName: slack_logs
+    user: postgres
