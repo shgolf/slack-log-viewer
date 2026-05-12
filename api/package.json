@@ -1,9 +1,4 @@
 {
-  "name": "slack-log-viewer",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "cd frontend && npm install && npm run build"
-  },
   "dependencies": {
     "@slack/web-api": "^7.3.4",
     "cors": "^2.8.5",
