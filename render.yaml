@@ -27,4 +27,3 @@ services:
 databases:
   - name: slack-log-db
     databaseName: slack_logs
-    user: postgres
