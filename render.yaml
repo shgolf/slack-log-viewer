@@ -11,13 +11,3 @@ services:
         sync: false
       - key: NODE_ENV
         value: production
-
-  - type: cron
-    name: slack-log-sync
-    runtime: node
-    schedule: "0 * * * *"
-    buildCommand: echo "skip"
-    startCommand: node backend/scripts/sync.mjs
-    envVars:
-      - key: BACKEND_URL
-        value: https://slack-log-viewer.onrender.com
