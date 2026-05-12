@@ -1,6 +1,6 @@
 import type { Channel, MessagesResponse } from "../types";
 
-const BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? "/api";
+const BASE = "/api";
 
 export async function getChannels(): Promise<Channel[]> {
   const res = await fetch(`${BASE}/channels`);
