@@ -4,8 +4,13 @@ import { pool } from "../db/client";
 const router = Router();
 
 router.get("/", async (_req, res) => {
-  const result = await pool.query("SELECT * FROM channels ORDER BY name ASC");
-  res.json(result.rows);
+  try {
+    const result = await pool.query("SELECT * FROM channels ORDER BY name ASC");
+    res.json(result.rows);
+  } catch (e) {
+    console.error("[channels]", e);
+    res.status(500).json({ error: String(e) });
+  }
 });
 
 export default router;
