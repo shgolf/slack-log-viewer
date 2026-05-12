@@ -4,12 +4,7 @@
     "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "*": ["api/node_modules/*"]
-    },
-    "typeRoots": ["api/node_modules/@types"]
+    "skipLibCheck": true
   },
-  "include": ["api", "backend/src"]
+  "include": ["api"]
 }

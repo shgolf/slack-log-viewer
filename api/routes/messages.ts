@@ -48,9 +48,7 @@ router.get("/", async (req, res) => {
     ${limitClause} ${offsetClause}
   `;
 
-  const countQuery = `
-    SELECT COUNT(*) FROM messages m ${where}
-  `;
+  const countQuery = `SELECT COUNT(*) FROM messages m ${where}`;
 
   const [rows, count] = await Promise.all([
     pool.query(query, params),

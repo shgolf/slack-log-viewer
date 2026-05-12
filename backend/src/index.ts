@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import fs from "fs";
 import path from "path";
-import { app } from "./app";
-import { pool } from "./db/client";
-
-dotenv.config();
+import { app } from "../../api/app";
+import { pool } from "../../api/db/client";
 
 const PORT = process.env.PORT ?? 3001;
 
@@ -17,7 +17,7 @@ if (fs.existsSync(frontendDist)) {
 
 async function runMigrations() {
   const sql = fs.readFileSync(
-    path.join(__dirname, "db/migrations/001_initial.sql"),
+    path.join(__dirname, "../../api/db/migrations/001_initial.sql"),
     "utf-8"
   );
   await pool.query(sql);
