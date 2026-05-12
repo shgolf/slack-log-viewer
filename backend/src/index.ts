@@ -1,26 +1,13 @@
-import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
+import express from "express";
 import fs from "fs";
 import path from "path";
+import { app } from "./app";
 import { pool } from "./db/client";
-import channelsRouter from "./routes/channels";
-import messagesRouter from "./routes/messages";
-import syncRouter from "./routes/sync";
 
 dotenv.config();
 
-const app = express();
 const PORT = process.env.PORT ?? 3001;
-
-app.use(cors());
-app.use(express.json());
-
-app.use("/api/channels", channelsRouter);
-app.use("/api/messages", messagesRouter);
-app.use("/api/sync", syncRouter);
-
-app.get("/health", (_req, res) => res.json({ ok: true }));
 
 const frontendDist = path.join(__dirname, "../../frontend/dist");
 if (fs.existsSync(frontendDist)) {
