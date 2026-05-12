@@ -1,10 +1,9 @@
 services:
   - type: web
-    name: slack-log-viewer-backend
+    name: slack-log-viewer
     runtime: node
-    rootDir: backend
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    buildCommand: cd frontend && npm install && npm run build && cd ../backend && npm install && npm run build
+    startCommand: node backend/dist/index.js
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -15,24 +14,15 @@ services:
       - key: NODE_ENV
         value: production
 
-  - type: static
-    name: slack-log-viewer-frontend
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    envVars:
-      - key: VITE_API_BASE
-        value: https://slack-log-viewer-backend.onrender.com/api
-
   - type: cron
     name: slack-log-sync
     runtime: node
     schedule: "0 * * * *"
-    buildCommand: echo "no build"
+    buildCommand: echo "skip"
     startCommand: node backend/scripts/sync.mjs
     envVars:
       - key: BACKEND_URL
-        value: https://slack-log-viewer-backend.onrender.com
+        value: https://slack-log-viewer.onrender.com
 
 databases:
   - name: slack-log-db
