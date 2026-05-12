@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getMessages } from "../api/client";
 import type { Message } from "../types";
 import SearchBar from "../components/SearchBar";
@@ -16,32 +16,38 @@ export default function MessagesPage() {
   const [keyword, setKeyword] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [channelName, setChannelName] = useState("");
 
-  const fetchData = useCallback(
-    async (currentPage: number) => {
-      if (!channelId) return;
-      setLoading(true);
-      try {
-        const res = await getMessages({
-          channel_id: Number(channelId),
-          keyword: keyword || undefined,
-          date_from: dateFrom || undefined,
-          date_to: dateTo || undefined,
-          limit: PAGE_SIZE,
-          offset: currentPage * PAGE_SIZE,
-        });
-        setMessages(res.messages);
-        setTotal(res.total);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [channelId, keyword, dateFrom, dateTo]
-  );
+  const fetchData = useCallback(async (currentPage: number) => {
+    if (!channelId) return;
+    setLoading(true);
+    try {
+      const res = await getMessages({
+        channel_id: Number(channelId),
+        keyword: keyword || undefined,
+        date_from: dateFrom || undefined,
+        date_to: dateTo || undefined,
+        limit: PAGE_SIZE,
+        offset: currentPage * PAGE_SIZE,
+      });
+      setMessages(res.messages);
+      setTotal(res.total);
+      if (res.messages[0]?.channel_name) setChannelName(res.messages[0].channel_name);
+    } finally {
+      setLoading(false);
+    }
+  }, [channelId, keyword, dateFrom, dateTo]);
+
+  useEffect(() => {
+    setPage(0);
+    setKeyword("");
+    setDateFrom("");
+    setDateTo("");
+    setChannelName("");
+  }, [channelId]);
 
   useEffect(() => {
     fetchData(0);
-    setPage(0);
   }, [channelId]);
 
   function handleSearch() {
@@ -52,6 +58,7 @@ export default function MessagesPage() {
   function handlePageChange(newPage: number) {
     setPage(newPage);
     fetchData(newPage);
+    window.scrollTo(0, 0);
   }
 
   function handleFilterChange(field: "keyword" | "dateFrom" | "dateTo", value: string) {
@@ -61,9 +68,9 @@ export default function MessagesPage() {
   }
 
   return (
-    <div>
-      <div style={{ marginBottom: 16 }}>
-        <Link to="/" style={{ color: "#1264a3", textDecoration: "none" }}>← チャンネル一覧</Link>
+    <>
+      <div className="main-header">
+        <h2># {channelName || "..."}</h2>
       </div>
       <SearchBar
         keyword={keyword}
@@ -80,6 +87,6 @@ export default function MessagesPage() {
         pageSize={PAGE_SIZE}
         onPageChange={handlePageChange}
       />
-    </div>
+    </>
   );
 }
