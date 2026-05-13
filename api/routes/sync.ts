@@ -5,6 +5,7 @@ import { fetchAllChannels, fetchMessages } from "../slack/client";
 const router = Router();
 
 router.post("/", async (_req, res) => {
+  try {
   const DAYS = 90;
   const oldest = String(Date.now() / 1000 - DAYS * 24 * 60 * 60);
 
@@ -57,6 +58,10 @@ router.post("/", async (_req, res) => {
   }
 
   res.json({ ok: true, inserted: totalInserted, skipped, errors });
+  } catch (e) {
+    console.error("[sync] fatal:", e);
+    res.status(500).json({ error: String(e) });
+  }
 });
 
 export default router;
