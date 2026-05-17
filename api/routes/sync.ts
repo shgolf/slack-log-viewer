@@ -4,11 +4,10 @@ import { fetchAllChannels, fetchMessages } from "../slack/client";
 
 const router = Router();
 
-router.post("/", async (_req, res) => {
-  try {
-  const DAYS = 90;
-  const oldest = String(Date.now() / 1000 - DAYS * 24 * 60 * 60);
+const INITIAL_DAYS = 90;
 
+async function runSync(_req: any, res: any) {
+  try {
   const channels = await fetchAllChannels();
 
   let totalInserted = 0;
@@ -18,18 +17,25 @@ router.post("/", async (_req, res) => {
   for (const ch of channels) {
     if (!ch.id || !ch.name) continue;
 
-    await pool.query(
+    const { rows: upserted } = await pool.query(
       `INSERT INTO channels (slack_id, name)
        VALUES ($1, $2)
-       ON CONFLICT (slack_id) DO UPDATE SET name = EXCLUDED.name`,
+       ON CONFLICT (slack_id) DO UPDATE SET name = EXCLUDED.name
+       RETURNING id`,
       [ch.id, ch.name]
     );
+    const channelDbId: number = upserted[0].id;
 
-    const { rows } = await pool.query(
-      "SELECT id FROM channels WHERE slack_id = $1",
-      [ch.id]
+    // Use the latest stored message timestamp for incremental sync,
+    // falling back to INITIAL_DAYS ago for first-time channel sync.
+    const { rows: latestRows } = await pool.query(
+      "SELECT MAX(slack_ts) AS latest FROM messages WHERE channel_id = $1",
+      [channelDbId]
     );
-    const channelDbId: number = rows[0].id;
+    const latestTs: string | null = latestRows[0].latest;
+    const oldest = latestTs
+      ? String(Number(latestTs) + 0.000001)
+      : String(Date.now() / 1000 - INITIAL_DAYS * 24 * 60 * 60);
 
     let messages;
     try {
@@ -62,6 +68,9 @@ router.post("/", async (_req, res) => {
     console.error("[sync] fatal:", e);
     res.status(500).json({ error: String(e) });
   }
-});
+}
+
+router.get("/", runSync);
+router.post("/", runSync);
 
 export default router;
