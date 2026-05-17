@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@vercel/node": "^3.0.0",
     "@slack/web-api": "^7.3.4",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
