@@ -7,7 +7,7 @@ import MessageList from "../components/MessageList";
 
 const PAGE_SIZE = 50;
 
-export default function MessagesPage() {
+export default function MessagesPage({ refreshKey }: { refreshKey?: number }) {
   const { channelId } = useParams<{ channelId: string }>();
   const [messages, setMessages] = useState<Message[]>([]);
   const [total, setTotal] = useState(0);
@@ -49,6 +49,10 @@ export default function MessagesPage() {
   useEffect(() => {
     fetchData(0);
   }, [channelId]);
+
+  useEffect(() => {
+    if (refreshKey) fetchData(page);
+  }, [refreshKey]);
 
   function handleSearch() {
     setPage(0);

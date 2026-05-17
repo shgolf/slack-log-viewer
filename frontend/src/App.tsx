@@ -63,7 +63,7 @@ export default function App() {
                   </div>
                 }
               />
-              <Route path="/channels/:channelId" element={<MessagesPage />} />
+              <Route path="/channels/:channelId" element={<MessagesPage refreshKey={refreshKey} />} />
             </Routes>
           </main>
         </div>
