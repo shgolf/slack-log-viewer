@@ -5,6 +5,7 @@ import { fetchAllChannels, fetchMessages } from "../slack/client";
 const router = Router();
 
 const INITIAL_DAYS = 90;
+const INCREMENTAL_HOURS = 48;
 
 async function runSync(_req: any, res: any) {
   try {
@@ -26,16 +27,13 @@ async function runSync(_req: any, res: any) {
     );
     const channelDbId: number = upserted[0].id;
 
-    // Use the latest stored message timestamp for incremental sync,
-    // falling back to INITIAL_DAYS ago for first-time channel sync.
-    const { rows: latestRows } = await pool.query(
-      "SELECT MAX(slack_ts) AS latest FROM messages WHERE channel_id = $1",
+    const hasMessages = await pool.query(
+      "SELECT 1 FROM messages WHERE channel_id = $1 LIMIT 1",
       [channelDbId]
     );
-    const latestTs: string | null = latestRows[0].latest;
-    const oldest = latestTs
-      ? String(Number(latestTs) + 0.000001)
-      : String(Date.now() / 1000 - INITIAL_DAYS * 24 * 60 * 60);
+    const oldest = hasMessages.rows.length === 0
+      ? String(Date.now() / 1000 - INITIAL_DAYS * 24 * 60 * 60)
+      : String(Date.now() / 1000 - INCREMENTAL_HOURS * 60 * 60);
 
     let messages;
     try {
