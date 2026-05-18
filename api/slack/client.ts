@@ -17,7 +17,7 @@ export async function joinChannel(channelId: string) {
   await slack.conversations.join({ channel: channelId });
 }
 
-
+export async function fetchMessages(channelId: string, oldestTs: string) {
   const messages: Array<{
     ts: string;
     user?: string;
