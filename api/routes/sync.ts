@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { pool } from "../db/client";
-import { fetchAllChannels, fetchMessages } from "../slack/client";
+import { fetchAllChannels, fetchMessages, joinChannel } from "../slack/client";
 
 const router = Router();
 
@@ -39,14 +39,22 @@ async function runSync(_req: any, res: any) {
     try {
       messages = await fetchMessages(ch.id, oldest);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.error(`[sync] skip #${ch.name}: ${msg}`);
-      if (msg.includes("not_in_channel")) {
-        skipped.push(ch.name);
+      const errMsg = e instanceof Error ? e.message : String(e);
+      if (errMsg.includes("not_in_channel") && !ch.is_private) {
+        try {
+          await joinChannel(ch.id);
+          messages = await fetchMessages(ch.id, oldest);
+        } catch (e2) {
+          const msg2 = e2 instanceof Error ? e2.message : String(e2);
+          console.error(`[sync] skip #${ch.name} after join attempt: ${msg2}`);
+          skipped.push(ch.name);
+          continue;
+        }
       } else {
-        errors.push({ channel: ch.name, error: msg });
+        console.error(`[sync] skip #${ch.name}: ${errMsg}`);
+        skipped.push(ch.name);
+        continue;
       }
-      continue;
     }
 
     for (const msg of messages) {

@@ -16,7 +16,8 @@ export default function App() {
     setSyncMsg(null);
     try {
       const r = await triggerSync();
-      setSyncMsg({ text: `同期完了: ${r.inserted}件追加`, ok: true });
+      const skippedNote = r.skipped?.length ? ` (${r.skipped.length}ch未参加でスキップ)` : "";
+      setSyncMsg({ text: `同期完了: ${r.inserted}件追加${skippedNote}`, ok: true });
       setRefreshKey((k) => k + 1);
     } catch {
       setSyncMsg({ text: "同期に失敗しました", ok: false });

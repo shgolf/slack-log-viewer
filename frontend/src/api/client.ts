@@ -29,7 +29,7 @@ export async function getMessages(params: {
   return res.json();
 }
 
-export async function triggerSync(): Promise<{ ok: boolean; inserted: number }> {
+export async function triggerSync(): Promise<{ ok: boolean; inserted: number; skipped: string[] }> {
   const res = await fetch(`${BASE}/sync`, { method: "POST" });
   if (!res.ok) throw new Error("Sync failed");
   return res.json();
